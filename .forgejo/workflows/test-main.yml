@@ -1,0 +1,95 @@
+name: Test Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: docker
+
+    env:
+      DATABASE_URL: sqlite:///./test.db
+
+    container:
+      image: node:20-bookworm
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        run: |
+          apt-get update
+          apt-get install -y python3 python3-pip python3-venv curl
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        working-directory: ./backend
+        run: |
+          . .venv/bin/activate
+          set -o pipefail
+          pytest 2>&1 | tee pytest-output.txt
+
+      - name: Send Discord notification
+        if: always()
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STATUS: ${{ job.status }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL secret is not set. Skipping Discord notification."
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+
+          status = os.environ.get("STATUS", "unknown")
+          repo = os.environ.get("REPO", "unknown")
+          branch = os.environ.get("BRANCH", "unknown")
+          commit = os.environ.get("COMMIT", "unknown")[:8]
+
+          try:
+              output = subprocess.check_output(
+                  ["tail", "-n", "25", "backend/pytest-output.txt"],
+                  text=True,
+                  stderr=subprocess.DEVNULL,
+              )
+          except Exception:
+              output = "No pytest output file found."
+
+          content = (
+              f"Forgejo CI finished: **{status}**\n"
+              f"Repo: {repo}\n"
+              f"Branch: {branch}\n"
+              f"Commit: {commit}\n\n"
+              f"Last test output:\n```text\n{output[-1500:]}\n```"
+          )
+
+          with open("backend/discord-payload.json", "w") as f:
+              json.dump({"content": content}, f)
+          PY
+
+          curl -fsS \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: Forgejo-CI-Notify/1.0" \
+            -X POST \
+            --data-binary @backend/discord-payload.json \
+            "$DISCORD_WEBHOOK_URL"
+
+
