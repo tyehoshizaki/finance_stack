@@ -1,7 +1,9 @@
 import type {
   Transaction,
-  TransactionCreate,
   PaginatedTransactionsResponse,
+  TransactionSort,
+  TransactionSortOrder,
+  TransactionCreate,
   TransactionUpdate,
 } from "../types/transactions";
 
@@ -10,8 +12,18 @@ const API_URL = "/api";
 export async function getTransactions(
   page: number = 1,
   pageSize: number = 10,
+  sortBy: TransactionSort,
+  sortOrder: TransactionSortOrder,
 ): Promise<PaginatedTransactionsResponse> {
-  const url = `${API_URL}/transactions/?page=${page}&page_size=${pageSize}`;
+
+  const params = new URLSearchParams({
+    page: page.toString(),
+    page_size: pageSize.toString(),
+    sort_by: sortBy.sort_by,
+    sort_order: sortOrder.sort_order,
+  });
+
+  const url = `${API_URL}/transactions/?${params.toString()}`;
 
   const response = await fetch(url);
 
