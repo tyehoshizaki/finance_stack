@@ -1,18 +1,15 @@
 import { useState, type SubmitEvent } from "react";
 
 import { createTransaction } from "../api/transactions";
-import type {
-  Transaction,
-  TransactionType,
-} from "../types/transactions";
+import type { Transaction, TransactionType } from "../types/transactions";
+
+import "../css/inputFroms.css";
 
 interface CreateTransactionFormProps {
   onTransactionCreated: (transaction: Transaction) => void;
 }
 
-function CreateTransactionForm({
-  onTransactionCreated,
-}: CreateTransactionFormProps) {
+function CreateTransactionForm({onTransactionCreated}: CreateTransactionFormProps) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -21,12 +18,14 @@ function CreateTransactionForm({
   const [merchant, setMerchant] = useState("");
   const [transactionDate, setTransactionDate] = useState(() => new Date().toISOString().split("T")[0]);
 
+  const amountTicks = Math.round(Number(amount) * 10000);
+
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const newTransaction = await createTransaction({
       name: name,
-      amount: Number(amount),
+      amount: amountTicks,
       category: category,
       transaction_type: transactionType,
       description: description || null,
@@ -48,12 +47,17 @@ function CreateTransactionForm({
         onChange={(event) => setName(event.target.value)}
       />
 
-      <input
-        type="number"
-        placeholder="Amount"
-        value={amount}
-        onChange={(event) => setAmount(event.target.value)}
-      />
+      <div className="amount-input">
+        <span>$</span>
+
+        <input
+          type="number"
+          value={amount}
+          step="0.01"
+          placeholder="0.00"
+          onChange={(event) => setAmount(event.target.value)}
+        />
+      </div>
 
       <input
         type="text"

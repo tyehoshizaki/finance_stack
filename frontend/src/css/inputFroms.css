@@ -1,0 +1,18 @@
+.amount-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+.amount-input span {
+  margin-right: 4px;
+}
+
+.amount-input input {
+  border: none;
+  outline: none;
+  padding: 8px 0;
+  width: 100%;
+}

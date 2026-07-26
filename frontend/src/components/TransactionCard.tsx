@@ -18,6 +18,15 @@ interface TransactionCardProps {
   onDelete: (transactionId: number) => void;
 }
 
+function formatMoney(ticks: number): string {
+  const dollars = ticks / 10000;
+
+  return new Intl.NumberFormat("en-CA", {
+    style: "currency",
+    currency: "CAD",
+  }).format(dollars);
+}
+
 function TransactionCard({
   transaction,
   onUpdate,
@@ -146,7 +155,7 @@ function TransactionCard({
         <p>{transaction.transaction_date}</p>
       </div>
 
-      <p className={amountClass}>{transaction.amount}</p>
+      <p className={amountClass}>{formatMoney(transaction.amount)}</p>
       <button onClick={handleEditClick}>Edit</button>
       <button onClick={handleDeleteClick}>Delete</button>
     </div>

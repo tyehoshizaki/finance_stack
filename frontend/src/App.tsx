@@ -23,20 +23,35 @@ function App() {
   const [pageSize, setPageSize] = useState(10);
 
   const loadTransactions = useCallback(async () => {
+
+    console.log("1. loadTransactions started");
+
     try {
+      console.log("2. About to call getTransactions", page, pageSize);
+
       const data = await getTransactions(page, pageSize);
+
       setTransactions(data.items);
       setTotalPages(data.total_pages);
       setHasNext(data.has_next);
       setHasPrevious(data.has_previous);
+
+      console.log("3. Transactions loaded successfully", data.items);
+
     } catch (error) {
+
+      console.error("Error fetching transactions:", error);
+
       if (error instanceof Error) {
         setError(error.message);
+
       } else {
         setError("Something went wrong");
+
       }
     } finally {
       setLoading(false);
+      
     }
   }, [page, pageSize]);
 
