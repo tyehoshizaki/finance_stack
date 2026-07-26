@@ -5,10 +5,14 @@ import {
   updateTransaction,
   deleteTransaction,
  } from "./api/transactions";
+
 import type { 
   Transaction,
+  TransactionSort,
+  TransactionSortOrder,
   TransactionUpdate,
  } from "./types/transactions";
+ 
 import TransactionCard from "./components/TransactionCard";
 import CreateTransactionForm from "./components/CreateTransactionForm";
 
@@ -17,6 +21,10 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+
+  const [sortBy, setSortBy] = useState<TransactionSort>({ sort_by: "transaction_date" });
+  const [sortOrder, setSortOrder] = useState<TransactionSortOrder>({ sort_order: "desc" });
+
   const [totalPages, setTotalPages] = useState(1);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrevious, setHasPrevious] = useState(false);
@@ -29,7 +37,7 @@ function App() {
     try {
       console.log("2. About to call getTransactions", page, pageSize);
 
-      const data = await getTransactions(page, pageSize);
+      const data = await getTransactions(page, pageSize, sortBy, sortOrder);
 
       setTransactions(data.items);
       setTotalPages(data.total_pages);
@@ -53,7 +61,7 @@ function App() {
       setLoading(false);
       
     }
-  }, [page, pageSize]);
+  }, [page, pageSize, sortBy, sortOrder]);
 
   async function handleCreatedTransaction(_transaction: Transaction) {
     await loadTransactions();
@@ -107,6 +115,33 @@ function App() {
       <CreateTransactionForm onTransactionCreated={handleCreatedTransaction} />
 
       <h2>Transactions</h2>
+
+      <div>
+        <select
+        value={sortBy.sort_by}
+        onChange={(event) => {
+          setSortBy({ sort_by: event.target.value as TransactionSort["sort_by"] });
+        }}
+      >
+        <option value="transaction_date">Date</option>
+        <option value="name">Name</option>
+        <option value="amount">Amount</option>
+        <option value="category">Category</option>
+        <option value="transaction_type">Type</option>
+      </select>
+      </div>
+
+      <div>
+        <select
+          value={sortOrder.sort_order}
+          onChange={(event) => {
+            setSortOrder({ sort_order: event.target.value as TransactionSortOrder["sort_order"] });
+          }}
+        >
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
 
       {transactions.map((transaction) => (
         <TransactionCard 
