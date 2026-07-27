@@ -27,6 +27,16 @@ function formatMoney(ticks: number): string {
   }).format(dollars);
 }
 
+function ticksToDollars(ticks: number): string {
+  const dollars = ticks / 10000;
+
+  return dollars.toFixed(2);
+}
+
+function dollarsToTicks(dollars: string): number {
+  return Math.round(Number(dollars) * 10000);
+}
+
 function TransactionCard({
   transaction,
   onUpdate,
@@ -35,7 +45,7 @@ function TransactionCard({
   const [isEditing, setIsEditing] = useState(false);
 
   const [name, setName] = useState(transaction.name);
-  const [amount, setAmount] = useState(String(transaction.amount));
+  const [amount, setAmount] = useState(String(ticksToDollars(transaction.amount)));
   const [category, setCategory] = useState(transaction.category);
   const [transactionType, setTransactionType] = useState<TransactionType>(transaction.transaction_type);
   const [description, setDescription] = useState(transaction.description ?? "");
@@ -51,7 +61,7 @@ function TransactionCard({
 
   function handleEditClick() {
     setName(transaction.name);
-    setAmount(String(transaction.amount));
+    setAmount(String(ticksToDollars(transaction.amount)));
     setCategory(transaction.category);
     setTransactionType(transaction.transaction_type);
     setDescription(transaction.description ?? "");
@@ -75,7 +85,7 @@ function TransactionCard({
 
     await onUpdate(transaction.id, {
       name,
-      amount: Number(amount),
+      amount: dollarsToTicks(amount),
       category,
       transaction_type: transactionType,
       description: description || null,
@@ -95,12 +105,16 @@ function TransactionCard({
           onChange={(event) => setName(event.target.value)}
         />
 
-        <input
-          type="number"
-          value={amount}
-          onChange={(event) => setAmount(event.target.value)}
-        />
+        <div className="amount-input">
+          <span>$</span>
 
+          <input
+            type="number"
+            value={amount}
+            step="0.01"
+            onChange={(event) => setAmount(event.target.value)}
+          />
+        </div>
         <input
           type="text"
           value={category}
