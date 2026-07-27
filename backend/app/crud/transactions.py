@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.models import Transaction
@@ -35,10 +36,10 @@ def sort_transactions(query, sort_by: SortBy, sort_order: SortOrder):
     sorting_columns = {
         SortBy.TRANSACTION_DATE: Transaction.transaction_date,
         SortBy.AMOUNT: Transaction.amount,
-        SortBy.CATEGORY: Transaction.category,
+        SortBy.CATEGORY: func.lower(Transaction.category),
         SortBy.TRANSACTION_TYPE: Transaction.transaction_type,
         SortBy.ID: Transaction.id,
-        SortBy.NAME: Transaction.name
+        SortBy.NAME: func.lower(Transaction.name)
     }
     
     sorting_column = sorting_columns[sort_by]
