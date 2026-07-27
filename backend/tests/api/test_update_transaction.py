@@ -20,7 +20,7 @@ def test_update_transaction_success(client):
         "name": "Updated Salary",
         "amount": 150.0
     }
-    response = client.patch(f"/transactions/{transaction_id}", json=update_data)
+    response = client.patch(f"/transactions/{transaction_id}/", json=update_data)
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == transaction_id
@@ -33,7 +33,7 @@ def test_update_transaction_not_found(client):
         "name": "Updated Salary",
         "amount": 150.0
     }
-    response = client.patch("/transactions/9999", json=update_data)  # Assuming 9999 does not exist
+    response = client.patch("/transactions/9999/", json=update_data)  # Assuming 9999 does not exist
     assert response.status_code == 404
     
 # test update transaction with invalid data fails
@@ -53,7 +53,7 @@ def test_update_transaction_invalid_data(client):
     update_data = {
         "amount": -150.0
     }
-    response = client.patch(f"/transactions/{transaction_id}", json=update_data)
+    response = client.patch(f"/transactions/{transaction_id}/", json=update_data)
     assert response.status_code == 422  # Unprocessable Entity
     
     

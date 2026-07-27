@@ -62,7 +62,7 @@ def get_summary_route(db: Session = Depends(get_db), filters: TransactionFilters
     
     return build_summary(transactions=filtered_transactions)
 
-@router.get("/{transaction_id}", response_model=TransactionResponse)
+@router.get("/{transaction_id}/", response_model=TransactionResponse)
 def get_one_transaction_route(transaction_id: int, db: Session = Depends(get_db)):
     
     transaction = get_transaction_by_id(db=db, transaction_id=transaction_id)
